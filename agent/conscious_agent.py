@@ -34,13 +34,22 @@ class ConsciousAgent:
             handle_parsing_errors=True,
             max_iterations=10)
 
-    def get_api_key(self):
-        """Fetch API key from environment (OpenRouter key)"""
+    ef get_api_key(self):
+        """Fetch API key from Streamlit secrets or .env file"""
+        # Load .env if running locally
+        load_dotenv()
+
+        # First try Streamlit secrets (Cloud deployment)
+        if "openrouter_api_key" in st.secrets:
+            return st.secrets["openrouter_api_key"]
+
+        # Fallback: try environment variable (from .env or system env)
         api_key = os.getenv("openrouter_api_key")
-        
-        if not api_key:
-            raise ValueError("❌ openrouter_api_key not set in environment.")
-        return api_key
+        if api_key:
+            return api_key
+
+        # If nothing found → raise error
+        raise ValueError("❌ openrouter_api_key not set in st.secrets or .env")
 
     def create_llm(self, model_name, temperature):
         """Create LLM instance for OpenRouter"""
