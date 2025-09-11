@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class ConsciousAgent:
-    def __init__(self, model_name="qwen/qwen3-235b-a22b:free", temperature=0.7):
+    def __init__(self, model_name="qwen/qwen2.5-vl-72b-instruct:free", temperature=0.7):
         """Initialize the agent with OpenRouter and tools"""
         self.api_key = self.get_api_key()
         self.llm = self.create_llm(model_name, temperature)
