@@ -54,13 +54,12 @@ class ConsciousAgent:
         raise ValueError("❌ openrouter_api_key not set in st.secrets or .env")
 
     def create_llm(self, model_name, temperature):
-        """Create LLM instance for OpenRouter"""
         return ChatOpenAI(
             model=model_name,
             temperature=temperature,
             max_tokens=1200,
-            openai_api_key=self.api_key,
-            openai_api_base="https://openrouter.ai/api/v1",
+            api_key=self.api_key,
+            base_url="https://openrouter.ai/api/v1", 
             default_headers={
                 "HTTP-Referer": "http://localhost:8501",
                 "X-Title": "Conscious Day Agent"
