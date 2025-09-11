@@ -224,8 +224,8 @@ class ConsciousAgent:
         # Parse the response
         return self._parse_response(response["output"])
 
-    def _parse_response(self, response: str) -> Dict[str, str]:
-        """Parse the agent response into structured sections"""
+        def _parse_response(self, response: str) -> Dict[str, str]:
+        """Parse the agent response into structured sections or JSON"""
         
         sections = {
             'reflection': '',
@@ -233,42 +233,54 @@ class ConsciousAgent:
             'mindset_insight': '',
             'strategy': ''
         }
-        
-        # Split by section headers
+
+        # Try JSON first
+        try:
+            data = json.loads(response)
+            # Map JSON fields into our structure if they exist
+            if "intention" in data:
+                sections['reflection'] = f"Intention: {data.get('intention','')}"
+            if "emotional_state" in data:
+                sections['reflection'] += f"\nEmotional State: {data.get('emotional_state','')}"
+            if "dream_analysis" in data:
+                sections['dream_interpretation'] = data.get("dream_analysis", "")
+            if "plan" in data:
+                sections['strategy'] = data.get("plan", "")
+            if "mindset" in data:
+                sections['mindset_insight'] = data.get("mindset", "")
+            if "priorities" in data:
+                priorities = data.get("priorities")
+                if isinstance(priorities, list):
+                    priorities = ", ".join(priorities)
+                sections['reflection'] += f"\nPriorities: {priorities}"
+            return sections
+        except Exception:
+            pass  # Not JSON, fall back to text parsing
+
+        # Otherwise, split by section headers (your existing logic)
         parts = response.split('**')
-        
         current_section = None
         for part in parts:
             part = part.strip()
-            
             if 'INNER REFLECTION:' in part.upper():
                 current_section = 'reflection'
-                content = part.replace('INNER REFLECTION:', '').replace('Inner Reflection:', '').strip()
-                sections[current_section] = content
+                sections[current_section] = part.replace('INNER REFLECTION:', '').strip()
             elif 'DREAM INTERPRETATION:' in part.upper():
                 current_section = 'dream_interpretation'
-                content = part.replace('DREAM INTERPRETATION:', '').replace('Dream Interpretation:', '').strip()
-                sections[current_section] = content
+                sections[current_section] = part.replace('DREAM INTERPRETATION:', '').strip()
             elif 'MINDSET INSIGHT:' in part.upper():
                 current_section = 'mindset_insight'
-                content = part.replace('MINDSET INSIGHT:', '').replace('Mindset Insight:', '').strip()
-                sections[current_section] = content
+                sections[current_section] = part.replace('MINDSET INSIGHT:', '').strip()
             elif 'DAY STRATEGY:' in part.upper():
                 current_section = 'strategy'
-                content = part.replace('DAY STRATEGY:', '').replace('Day Strategy:', '').strip()
-                sections[current_section] = content
-            elif current_section and part and not any(header in part.upper() for header in ['INNER REFLECTION:', 'DREAM INTERPRETATION:', 'MINDSET INSIGHT:', 'DAY STRATEGY:']):
-                # Continue adding to current section
-                if sections[current_section]:
-                    sections[current_section] += ' ' + part
-                else:
-                    sections[current_section] = part
+                sections[current_section] = part.replace('DAY STRATEGY:', '').strip()
+            elif current_section and part:
+                # Append extra lines to the active section
+                sections[current_section] += " " + part
 
         # Clean up sections
         for key in sections:
-            sections[key] = sections[key].strip()
-            # Remove bracket placeholders if present
-            if sections[key].startswith('[') and sections[key].endswith(']'):
-                sections[key] = sections[key][1:-1].strip()
+            sections[key] = sections[key].strip(" []")
         
         return sections
+
