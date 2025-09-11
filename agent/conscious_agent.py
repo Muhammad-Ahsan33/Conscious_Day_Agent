@@ -225,62 +225,62 @@ class ConsciousAgent:
         return self._parse_response(response["output"])
 
         def _parse_response(self, response: str) -> Dict[str, str]:
-        """Parse the agent response into structured sections or JSON"""
-        
-        sections = {
-            'reflection': '',
-            'dream_interpretation': '',
-            'mindset_insight': '',
-            'strategy': ''
-        }
-
-        # Try JSON first
-        try:
-            data = json.loads(response)
-            # Map JSON fields into our structure if they exist
-            if "intention" in data:
-                sections['reflection'] = f"Intention: {data.get('intention','')}"
-            if "emotional_state" in data:
-                sections['reflection'] += f"\nEmotional State: {data.get('emotional_state','')}"
-            if "dream_analysis" in data:
-                sections['dream_interpretation'] = data.get("dream_analysis", "")
-            if "plan" in data:
-                sections['strategy'] = data.get("plan", "")
-            if "mindset" in data:
-                sections['mindset_insight'] = data.get("mindset", "")
-            if "priorities" in data:
-                priorities = data.get("priorities")
-                if isinstance(priorities, list):
-                    priorities = ", ".join(priorities)
-                sections['reflection'] += f"\nPriorities: {priorities}"
+            """Parse the agent response into structured sections or JSON"""
+            
+            sections = {
+                'reflection': '',
+                'dream_interpretation': '',
+                'mindset_insight': '',
+                'strategy': ''
+            }
+    
+            # Try JSON first
+            try:
+                data = json.loads(response)
+                # Map JSON fields into our structure if they exist
+                if "intention" in data:
+                    sections['reflection'] = f"Intention: {data.get('intention','')}"
+                if "emotional_state" in data:
+                    sections['reflection'] += f"\nEmotional State: {data.get('emotional_state','')}"
+                if "dream_analysis" in data:
+                    sections['dream_interpretation'] = data.get("dream_analysis", "")
+                if "plan" in data:
+                    sections['strategy'] = data.get("plan", "")
+                if "mindset" in data:
+                    sections['mindset_insight'] = data.get("mindset", "")
+                if "priorities" in data:
+                    priorities = data.get("priorities")
+                    if isinstance(priorities, list):
+                        priorities = ", ".join(priorities)
+                    sections['reflection'] += f"\nPriorities: {priorities}"
+                return sections
+            except Exception:
+                pass  # Not JSON, fall back to text parsing
+    
+            # Otherwise, split by section headers (your existing logic)
+            parts = response.split('**')
+            current_section = None
+            for part in parts:
+                part = part.strip()
+                if 'INNER REFLECTION:' in part.upper():
+                    current_section = 'reflection'
+                    sections[current_section] = part.replace('INNER REFLECTION:', '').strip()
+                elif 'DREAM INTERPRETATION:' in part.upper():
+                    current_section = 'dream_interpretation'
+                    sections[current_section] = part.replace('DREAM INTERPRETATION:', '').strip()
+                elif 'MINDSET INSIGHT:' in part.upper():
+                    current_section = 'mindset_insight'
+                    sections[current_section] = part.replace('MINDSET INSIGHT:', '').strip()
+                elif 'DAY STRATEGY:' in part.upper():
+                    current_section = 'strategy'
+                    sections[current_section] = part.replace('DAY STRATEGY:', '').strip()
+                elif current_section and part:
+                    # Append extra lines to the active section
+                    sections[current_section] += " " + part
+    
+            # Clean up sections
+            for key in sections:
+                sections[key] = sections[key].strip(" []")
+            
             return sections
-        except Exception:
-            pass  # Not JSON, fall back to text parsing
-
-        # Otherwise, split by section headers (your existing logic)
-        parts = response.split('**')
-        current_section = None
-        for part in parts:
-            part = part.strip()
-            if 'INNER REFLECTION:' in part.upper():
-                current_section = 'reflection'
-                sections[current_section] = part.replace('INNER REFLECTION:', '').strip()
-            elif 'DREAM INTERPRETATION:' in part.upper():
-                current_section = 'dream_interpretation'
-                sections[current_section] = part.replace('DREAM INTERPRETATION:', '').strip()
-            elif 'MINDSET INSIGHT:' in part.upper():
-                current_section = 'mindset_insight'
-                sections[current_section] = part.replace('MINDSET INSIGHT:', '').strip()
-            elif 'DAY STRATEGY:' in part.upper():
-                current_section = 'strategy'
-                sections[current_section] = part.replace('DAY STRATEGY:', '').strip()
-            elif current_section and part:
-                # Append extra lines to the active section
-                sections[current_section] += " " + part
-
-        # Clean up sections
-        for key in sections:
-            sections[key] = sections[key].strip(" []")
-        
-        return sections
 
