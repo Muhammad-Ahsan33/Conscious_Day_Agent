@@ -43,6 +43,7 @@ class ConsciousAgent:
 
         # First try Streamlit secrets (Cloud deployment)
         if "openrouter_api_key" in st.secrets:
+            print("API key is streamlit secrets")
             return st.secrets["openrouter_api_key"]
 
         # Fallback: try environment variable (from .env or system env)
