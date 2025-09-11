@@ -34,7 +34,7 @@ class ConsciousAgent:
             handle_parsing_errors=True,
             max_iterations=10)
 
-    ef get_api_key(self):
+    def get_api_key(self):
         """Fetch API key from Streamlit secrets or .env file"""
         # Load .env if running locally
         load_dotenv()
