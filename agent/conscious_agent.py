@@ -37,18 +37,17 @@ class ConsciousAgent:
             max_iterations=10)
 
     def get_api_key(self):
-        # """Fetch API key from Streamlit secrets or .env file"""
-        # # Load .env if running locally
-        # load_dotenv()
+        """Fetch API key from Streamlit secrets or .env file"""
+        # Load .env if running locally
+        load_dotenv()
 
-        # # First try Streamlit secrets (Cloud deployment)
-        # if "openrouter_api_key" in st.secrets:
-        #     return st.secrets["openrouter_api_key"]
+        # First try Streamlit secrets (Cloud deployment)
+        if "openrouter_api_key" in st.secrets:
+            return st.secrets["openrouter_api_key"]
 
-        # # Fallback: try environment variable (from .env or system env)
-        # api_key = os.getenv("openrouter_api_key")
-        # if api_key:
-        api_key = "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"
+        # Fallback: try environment variable (from .env or system env)
+        api_key = os.getenv("openrouter_api_key")
+        if api_key:
             return api_key
 
         # If nothing found → raise error
